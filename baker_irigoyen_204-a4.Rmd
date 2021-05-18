@@ -1,0 +1,69 @@
+---
+title: "SCC and policy choice under uncertainty"
+author: "Bri Baker, Mikel Irigoyen"
+date: "5/17/2021"
+output: html_document
+---
+
+#### ANNA DO NOT READ THIS DOCUMENT IT IS NOT FOR U
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+
+## NEED TO ADD THE SCIPEN THINGY
+
+```
+
+## Data Setup
+
+```{r data}
+
+war <- read_csv(here("warming.csv")) %>%  # add warming data
+  rename("id" = "X1")
+
+dam <- read_csv(here("damages.csv")) # add damages data
+
+pulse <- 35000000000 # tons of carbon
+
+```
+
+## Question 1
+
+```{r}
+
+```
+
+
+
+## Question 2
+
+```{r}
+
+```
+
+
+## Question 3
+
+```{r}
+
+```
+
+
+## Question 4
+
+```{r}
+
+```
+
+
+## Question 5
+
+```{r}
+
+```
+
