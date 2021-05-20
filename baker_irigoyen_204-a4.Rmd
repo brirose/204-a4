@@ -15,7 +15,7 @@ library(tidyverse)
 library(here)
 library(janitor)
 
-## NEED TO ADD THE SCIPEN THINGY
+options(scipen=999)
 
 ```
 
@@ -34,10 +34,24 @@ pulse <- 35000000000 # tons of carbon
 
 ## Question 1
 
-```{r}
+```{r damage function}
+dam <- dam %>% 
+  mutate(warm2 = warming^2) # make quadratic term
+
+dam_deg <- lm(damages ~ 0 + warming + warm2, data = dam) # fit quadratic
+
+dam_deg_a <- dam_deg$coefficients[[2]] # squared term
+dam_deg_b <- dam_deg$coefficients[[1]] # second term
+  
+ggplot(dam, aes(x = warming, y = damages)) + # plot
+  geom_point() + # scatter
+  geom_smooth() # plot line
+
+## how to inline reference the square term???
 
 ```
 
+damage = `r dam_deg_a`warming^2^ + `r dam_deg_b`warming
 
 
 ## Question 2
