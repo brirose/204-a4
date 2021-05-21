@@ -44,7 +44,11 @@ dam_deg_b <- dam_deg$coefficients[[1]] # second term
   
 ggplot(dam, aes(x = warming, y = damages)) + # plot
   geom_point() + # scatter
-  geom_smooth() # plot line
+  geom_smooth()+
+  labs(title="Damage Function",
+        x ="Change in Global mean Temp", y = "Damages ($)")+
+  theme_minimal()
+# plot line
 
 ## how to inline reference the square term???
 
@@ -66,19 +70,28 @@ war <- war %>%
 
 ggplot(war, aes(x = year, y = damages_baseline))+
   geom_point() +
-  theme_minimal() # needs axis labs and titles
+  labs(title="Damages Without the Pulse",
+        x ="Year", y = "Damages ($)")+
+  theme_minimal() 
 
 ggplot(war, aes(x = year, y = damages_pulse))+
   geom_point() +
-  theme_minimal() # needs axis labs and titles
+  labs(title="Damages With the Pulse",
+        x ="Year", y = "Damages ($)")+
+  theme_minimal() 
 
 ggplot(war, aes(x = year, y = diff_damages))+
   geom_point() +
-  theme_minimal() # needs axis labs and titles
+  labs(title="Difference in Damages With and Without Pulse",
+        x ="Year", y = "Damages ($)")+
+  theme_minimal() 
 
 ggplot(war, aes(x = year, y = diff_ton))+
   geom_point() +
-  theme_minimal() # needs axis labs and titles
+  labs(title="Difference in Damages Over Time From the Pulse Per Ton of
+CO2 ",
+        x ="Year", y = "Damages ($)")+
+  theme_minimal() 
 
 ```
 
@@ -102,6 +115,8 @@ scc <- scc %>%
          "SCC" = "X183.316049160008")
 ggplot(scc)+
   geom_line(aes(x = Discount_Rate, y = SCC))+
+  labs(title="Social Cost of Carbon",
+        x ="Discount Rate (%)", y = "SCC (Dollars)")+
   theme_minimal()
 ```
 
@@ -122,6 +137,8 @@ scc_science <- r*slope + intercept
 ggplot(scc)+
   geom_line(aes(x = Discount_Rate, y = SCC))+
   geom_point(x = r, y = scc_science)+
+  labs(title="SCC Using Ramsey Rule",
+        x ="Discount Rate (%)", y = "SCC (Dollars)")+
   theme_minimal()
 
 ```
