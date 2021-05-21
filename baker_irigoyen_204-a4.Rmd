@@ -14,8 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(here)
 library(janitor)
-
-options(scipen=999)
+library(decisionSupport)
 
 ```
 
@@ -56,14 +55,44 @@ damage = `r dam_deg_a`warming^2^ + `r dam_deg_b`warming
 
 ## Question 2
 
-```{r}
+```{r graphs}
+
+war <- war %>% 
+  mutate(damages_baseline = dam_deg_a*warming_baseline^2 + dam_deg_b*warming_baseline,
+         damages_pulse = dam_deg_a*warming_pulse^2 + dam_deg_b*warming_pulse,
+         diff_damages = damages_pulse-damages_baseline,
+         diff_ton = diff_damages/pulse
+         ) # calc damages
+
+ggplot(war, aes(x = year, y = damages_baseline))+
+  geom_point() +
+  theme_minimal() # needs axis labs and titles
+
+ggplot(war, aes(x = year, y = damages_pulse))+
+  geom_point() +
+  theme_minimal() # needs axis labs and titles
+
+ggplot(war, aes(x = year, y = diff_damages))+
+  geom_point() +
+  theme_minimal() # needs axis labs and titles
+
+ggplot(war, aes(x = year, y = diff_ton))+
+  geom_point() +
+  theme_minimal() # needs axis labs and titles
 
 ```
 
 
 ## Question 3
 
-```{r}
+```{r scc}
+
+discounts <- c(.01, .02, .03, .04, .05)
+
+function(discount){
+  (1 + discount) * x / discount
+}
+
 
 ```
 
