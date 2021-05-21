@@ -88,18 +88,41 @@ ggplot(war, aes(x = year, y = diff_ton))+
 ```{r scc}
 
 discounts <- c(.01, .02, .03, .04, .05)
-
-function(discount){
-  (1 + discount) * x / discount
-}
-
-
+scc <- tribble(~c1, ~c2)
+for (i in discounts){
+  disc <- i
+  npv <- discount(war$diff_ton, 
+                  disc,
+                  calculate_NPV = TRUE)
+  bri <- c(disc, npv)
+  scc <- rbind(scc, bri)
+} 
+scc <- scc %>% 
+  rename("Discount_Rate" = "X0.01",
+         "SCC" = "X183.316049160008")
+ggplot(scc)+
+  geom_line(aes(x = Discount_Rate, y = SCC))+
+  theme_minimal()
 ```
 
 
 ## Question 4
 
 ```{r}
+#r = p + ng
+r = 0.001 +(2)*(0.01)
+
+scc_model <- lm(SCC ~ Discount_Rate, data = scc)
+
+slope <- scc_model$coefficients[[2]]
+intercept <- scc_model$coefficients[[1]]
+
+scc_science <- r*slope + intercept
+
+ggplot(scc)+
+  geom_line(aes(x = Discount_Rate, y = SCC))+
+  geom_point(x = r, y = scc_science)+
+  theme_minimal()
 
 ```
 
