@@ -1,16 +1,21 @@
 ---
-title: "SCC and policy choice under uncertainty"
+title: "SCC and Policy Choice Under Uncertainty"
 author: "Bri Baker, Mikel Irigoyen"
-date: "5/17/2021"
-output: html_document
+date: "5/23/2021"
+output:
+  html_document:
+    code_folding: hide
+    theme: cosmo
+    highlight: kate
+  pdf_document: default
 ---
-
-#### ANNA DO NOT READ THIS DOCUMENT IT IS NOT FOR U
-
 
 ```{r setup, include=FALSE}
 
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+
 library(tidyverse)
 library(here)
 library(janitor)
@@ -46,15 +51,12 @@ ggplot(dam, aes(x = warming, y = damages)) + # plot
   geom_point() + # scatter
   geom_smooth()+
   labs(title="Damage Function",
-        x ="Change in Global mean Temp", y = "Damages ($)")+
+        x ="Change in Global Mean Temp", y = "Damages ($)")+
   theme_minimal()
-# plot line
-
-## how to inline reference the square term???
 
 ```
 
-damage = `r dam_deg_a`warming^2^ + `r dam_deg_b`warming
+Damage = 1.94e+13 x warming^2^ + -1.03e+12 x warming.
 
 
 ## Question 2
@@ -62,11 +64,11 @@ damage = `r dam_deg_a`warming^2^ + `r dam_deg_b`warming
 ```{r graphs}
 
 war <- war %>% 
-  mutate(damages_baseline = dam_deg_a*warming_baseline^2 + dam_deg_b*warming_baseline,
-         damages_pulse = dam_deg_a*warming_pulse^2 + dam_deg_b*warming_pulse,
-         diff_damages = damages_pulse-damages_baseline,
-         diff_ton = diff_damages/pulse
-         ) # calc damages
+  mutate(damages_baseline = dam_deg_a*warming_baseline^2 + dam_deg_b*warming_baseline, # calc damages baseline
+         damages_pulse = dam_deg_a*warming_pulse^2 + dam_deg_b*warming_pulse, # calc damages with pulse
+         diff_damages = damages_pulse-damages_baseline, # calc difference in damages
+         diff_ton = diff_damages/pulse # calc difference per ton
+         )
 
 ggplot(war, aes(x = year, y = damages_baseline))+
   geom_point() +
@@ -100,20 +102,21 @@ CO2 ",
 
 ```{r scc}
 
-discounts <- c(.01, .02, .03, .04, .05)
-scc <- tribble(~c1, ~c2)
+discounts <- c(.01, .02, .03, .04, .05) # set range of discounts
+scc <- tribble(~c1, ~c2)  #initiate df
 for (i in discounts){
-  disc <- i
-  npv <- discount(war$diff_ton, 
+  disc <- i # assign discount
+  scc_pulse <- discount(war$diff_ton, # calc npv of differences using sum and discounting
                   disc,
                   calculate_NPV = TRUE)
-  bri <- c(disc, npv)
-  scc <- rbind(scc, bri)
+  bri <- c(disc, scc_pulse) # make list of discount rate and pulse
+  scc <- rbind(scc, bri) # add to df
 } 
 scc <- scc %>% 
   rename("Discount_Rate" = "X0.01",
-         "SCC" = "X183.316049160008")
-ggplot(scc)+
+         "SCC" = "X183.316049160008") # name df columns for clarity
+
+ggplot(scc)+ # plot
   geom_line(aes(x = Discount_Rate, y = SCC))+
   labs(title="Social Cost of Carbon",
         x ="Discount Rate (%)", y = "SCC (Dollars)")+
@@ -125,16 +128,16 @@ ggplot(scc)+
 
 ```{r}
 #r = p + ng
-r = 0.001 +(2)*(0.01)
+r = 0.001 +(2)*(0.01) # calculate r using ramsey rule
 
-scc_model <- lm(SCC ~ Discount_Rate, data = scc)
+scc_model <- lm(SCC ~ Discount_Rate, data = scc)# calc scc line based on range
 
-slope <- scc_model$coefficients[[2]]
-intercept <- scc_model$coefficients[[1]]
+slope <- scc_model$coefficients[[2]] # pull slope
+intercept <- scc_model$coefficients[[1]] #pull intercept
 
-scc_science <- r*slope + intercept
+scc_science <- r*slope + intercept # calculate scc with ramsey rule r
 
-ggplot(scc)+
+ggplot(scc)+ # plot
   geom_line(aes(x = Discount_Rate, y = SCC))+
   geom_point(x = r, y = scc_science)+
   labs(title="SCC Using Ramsey Rule",
@@ -144,9 +147,41 @@ ggplot(scc)+
 ```
 
 
+The SCC is $`r round(scc_science, 2)`/ton.
+
+
 ## Question 5
 
-```{r}
+```{r policy a and policy b}
 
+war <- war %>% 
+  mutate(warming_a = warming_baseline*1.5, # warming in a1
+         damages_a = dam_deg_a*warming_a^2 + dam_deg_b*warming_a, # damages in a 1
+         warming_b = case_when(year >= 2050 ~ 1.29, # warming in b
+                               TRUE ~ warming_baseline),
+         damages_b = dam_deg_a*warming_b^2 + dam_deg_b*warming_b) # damages in b
+
+npv_a1 <- discount(war$damages_baseline, # npv of damages of a1
+                   discount_rate = 0.02,
+                   calculate_NPV = TRUE)
+
+npv_a2 <- discount(war$damages_a, # npv of damages of a2
+                   discount_rate = 0.02,
+                   calculate_NPV = TRUE)
+
+npv_b <- discount(war$damages_b, # npv of damages of b
+                  discount_rate = 0.02,
+                  calculate_NPV = TRUE)
+
+npv_a <- (npv_a2 - npv_a1)/2 + npv_a1 # calc "utility" of a
+
+cost_difference <- npv_a - npv_b # compare costs of a and b
+  
 ```
 
+The expected present value of damages up to 2100 under Policy A is either $1.28e+16 or $5.66e+15.
+The expected present value of damages up to 2100 under Policy B is $1.89e+15.
+
+Until X is $7.36e+15 it still makes economic sense to pursue Policy b instead of Policy A. 
+
+If society were risk averse, the utility function would be concave rather than linear which would reduce the utility of the uncertain outcome.
